@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>地图组件</title>
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/css/esri.css">
+    <style>
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    #overviewMapDijit {
+        position:absolute;
+        z-index:31;
+        bottom:20px;
+        right:20px;
+    }
+    </style>
+</head>
+<body>
+    <div id="map">
+    </div>
+    <div style="position:absolute;z-index:31;top:20px;right:20px;">
+        <div id="homeButtonDijit"></div>
+        <div id="locateButtonDijit"></div>
+    </div>
+    <div id="overviewMapDijit"></div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+    require([
+        "esri/map",
+        "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/dijit/Scalebar",
+        "esri/dijit/HomeButton",
+        "esri/dijit/LocateButton",
+        "esri/dijit/OverviewMap",
+        "dojo/domReady!"
+    ], function(
+        Map,
+        ArcGISTiledMapServiceLayer,
+        Scalebar,
+        HomeButton,
+        LocateButton,
+        OverviewMap
+    ) {
+        var map = new Map("map", {
+            logo: false,
+            zoom: 8,
+            slider: true,
+            sliderPosition: "top-left"
+        });
+
+        var layer = new ArcGISTiledMapServiceLayer("//wx.yunqunet.net/arcgis/rest/services/shaoguan/sgdt/MapServer");
+
+        map.addLayer(layer);
+
+        //比例尽
+        new Scalebar({
+            map: map,
+            attachTo: "bottom-left"
+        });
+
+        //默认位置
+        var homeButton = new HomeButton({
+            map: map
+        }, "homeButtonDijit");
+        homeButton.startup();
+
+        //当前位置
+        var locateButton = new LocateButton({
+            map: map
+        }, "locateButtonDijit");
+
+        //鹰眼
+        new OverviewMap({
+            map: map,
+            visible: true,
+            attachTo: "bottom-right",
+            width: 400,
+            height: 300
+        }).startup();
+    });
+    </script>
+</body>
+</html>

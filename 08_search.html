@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>搜索组件</title>
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/css/esri.css">
+    <style>
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    #search {
+        position: absolute;
+        z-index: 31;
+        left: 15px;
+        top: 15px;
+    }
+    </style>
+</head>
+<body>
+    <div id="map">
+    </div>
+    <div id="search" style="">
+    </div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+    require([
+        "esri/map",
+        "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/layers/FeatureLayer",
+        "esri/dijit/Search",
+        "dojo/domReady!"
+    ], function(
+        Map,
+        ArcGISTiledMapServiceLayer,
+        FeatureLayer,
+        Search
+    ) {
+        var map = new Map("map", {
+            logo: false,
+            zoom: 8,
+            slider: true,
+            sliderPosition: "bottom-left"
+        });
+
+        var layer = new ArcGISTiledMapServiceLayer("//wx.yunqunet.net/arcgis/rest/services/shaoguan/sgdt/MapServer");
+
+        map.addLayer(layer);
+
+        //该组件需要arcgis server支持分页的特性
+        var search = new Search({
+            "sources": [{
+                "featureLayer": new FeatureLayer("http://218.244.149.31:6080/arcgis/rest/services/shaoguan/sg_wg0214/MapServer/0", {
+                    "outFields": ["*"]
+                }),
+                "outFields": ["*"],
+                "displayField": "FACNAME",
+                "suggestionTemplate": "${FACNAME}",
+                "name": "网格单元",
+                "placeholder": "例如：中国电信",
+                "enableSuggestions": true
+            }],
+            "enableInfoWindow": false,
+            map: map
+         }, "search");
+        search.startup();
+    });
+    </script>
+</body>
+</html>

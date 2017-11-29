@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>图层定义</title>
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/css/esri.css">
+    <style>
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    </style>
+</head>
+<body>
+    <div id="map">
+    </div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+    require([
+        "esri/map",
+        "esri/geometry/Extent",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "esri/layers/ImageParameters",
+        "dojo/domReady!"
+    ], function(
+        Map,
+        Extent,
+        ArcGISDynamicMapServiceLayer,
+        ImageParameters
+    ) {
+        var extent = new Extent({xmax: 112.92247197205451, xmin:112.91294461018704, ymax:23.931373031512287, ymin:23.92405640088274, spatialReference:{wkid:4326}});
+
+        var map = new Map("map", {
+            "logo": false,
+            "slider": true,
+            "sliderPosition": "top-left",
+            "extent": extent
+        });
+
+        var imageParameters = new ImageParameters();
+
+        //过滤数据
+        var layerDefs = [];
+        layerDefs[0] = "Level1='清远市'";
+
+        imageParameters.layerDefinitions = layerDefs;
+        imageParameters.layerIds = [0];//只操作图层0
+        imageParameters.layerOption = ImageParameters.LAYER_OPTION_SHOW;
+        imageParameters.transparent = true;
+
+        var layer = new ArcGISDynamicMapServiceLayer("//wx.yunqunet.net/arcgis/rest/services/qy/qydt/MapServer", {
+            "imageParameters": imageParameters
+        });
+
+        map.addLayer(layer);
+    });
+    </script>
+</body>
+</html>

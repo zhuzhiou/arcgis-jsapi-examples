@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>自定义图层</title>
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map">
+    </div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+        require([
+            "esri/map",
+            "esri/graphic",
+            "esri/geometry/Extent",
+            "esri/geometry/Point",
+            "esri/layers/FeatureLayer",
+            "dojo/_base/array",
+            "dojo/request/xhr",
+            "dojo/domReady!"
+        ], function (
+            Map,
+            Graphic,
+            Extent,
+            Point,
+            FeatureLayer,
+            arrayUtils,
+            xhr
+        ) {
+            var extent = new Extent({ xmax: 114.413019097, xmin: 114.397636495, ymax: 23.076331237, ymin: 23.085533864, spatialReference: { wkid: 4326 } });
+
+            var map = new Map("map", {
+                logo: false,
+                slider: true,
+                sliderPosition: "top-left",
+                extent: extent
+            });
+
+            var layerDefinition = {
+                "geometryType": "esriGeometryPoint",
+                "objectIdField": "OBJECT_ID",
+                "drawingInfo": {
+                    "renderer": {
+                        "type": "simple",
+                        "symbol": {
+                            "type": "esriPMS",
+                            "url": "flickr.png",
+                            "contentType": "image/png",
+                            "width": 15,
+                            "height": 15
+                        }
+                    }
+                },
+                "fields": [{
+                    "name": "OBJECT_ID",
+                    "type": "esriFieldTypeOID"
+                }, {
+                    "name": "DEVICE_ID",
+                    "type": "esriFieldTypeString"
+                }]
+            };
+
+            var featureCollection = {
+                "layerDefinition": layerDefinition,
+                "featureSet": {
+                    "features": [],
+                    "geometryType": "esriGeometryPoint"
+                }
+            };
+
+            var layer = new FeatureLayer(featureCollection, {
+                id: "temp"
+            });
+
+            map.on("layer-add-result", function(result) {
+                xhr("example.json", {
+                    handleAs: "json"
+                }).then(function(items) {
+                    var features = [];
+                    arrayUtils.forEach(items, function(item) {
+                        var attr = {};
+                        attr["DEVICE_ID"] = item.deviceId;
+
+                        var geometry = new Point(item);
+
+                        var graphic = new Graphic(geometry);
+                        graphic.setAttributes(attr);
+                        features.push(graphic);
+                    });
+                    layer.applyEdits(features, null, null);
+                });
+            });
+            map.addLayer(layer);
+        });
+    </script>
+</body>
+
+</html>
