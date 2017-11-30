@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>编辑</title>
+    <link rel="stylesheet" href="/calcite-maps/css/calcite-maps-bootstrap.min-v0.5.css">    
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/themes/calcite/dijit/calcite.css">
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/themes/calcite/esri/esri.css">
+    <style>
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    </style>
+</head>
+<body class="calcite">
+    <div id="map">
+    </div>
+    <div style="position:absolute;z-index:31;bottom:15px;right:15px;">
+        <button id="editPoint" class="btn btn-default">完成</button>
+    </div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+    require([
+        "esri/graphic",
+        "esri/map",
+        "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/layers/FeatureLayer",
+        "esri/toolbars/edit",
+        "esri/tasks/query",
+        "dijit/ConfirmDialog",
+        "dojo/dom",
+        "dojo/on",
+        "dojo/domReady!"
+    ], function(
+        Graphic,
+        Map,
+        ArcGISTiledMapServiceLayer,
+        FeatureLayer,
+        Edit,
+        Query,
+        ConfirmDialog,
+        dom,
+        on
+    ) {
+        var map = new Map("map", {
+            "logo": false,
+            "zoom": 10,
+            "slider": true,
+            "sliderPosition": "top-left",
+            "center": [113.590307, 24.801479]
+        });
+
+        (function() {
+            var layer = new ArcGISTiledMapServiceLayer("//wx.yunqunet.net/arcgis/rest/services/shaoguan/sgdt/MapServer");
+            map.addLayer(layer);
+        })();
+
+        (function() {
+            var edit = new Edit(map);
+            var layer = new FeatureLayer("http://wx.yunqunet.net/arcgis/rest/services/shaoguan/sg_sq0418/FeatureServer/0", {
+                mode: FeatureLayer.MODE_ONDEMAND
+            });
+            layer.on("click", function(event) {
+                event.stopPropagation();
+                event.preventDefault();
+                var graphic = event.graphic;
+                edit.activate(Edit.MOVE | Edit.EDIT_VERTICES | Edit.EDIT_TEXT, graphic, {
+                    "allowAddVertices": true,
+                    "allowDeleteVertices": true,
+                    "uniformScaling": false
+                });
+
+                //阻止地图编辑状态下移动时出现错位
+                var query = new Query();
+                query.objectIds = [graphic.attributes[layer.objectIdField]];
+                layer.selectFeatures(query);
+            })
+            map.addLayer(layer);
+
+            on(dom.byId("editPoint"), "click", function() {
+                edit.deactivate();
+            });
+        })();
+
+        new ConfirmDialog({
+            title: "操作提示",
+            content: "鼠标单击图形，进入编辑状态，修改完毕点击右下角完成按钮。",
+            style: "width: 300px"
+        }).show();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>绘图</title>
+    <link rel="stylesheet" href="/calcite-maps/css/calcite-maps-bootstrap.min-v0.5.css">    
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/themes/calcite/dijit/calcite.css">
+    <link rel="stylesheet" href="/arcgis_js_api/library/3.20/3.20compact/esri/themes/calcite/esri/esri.css">
+    <style>
+    html, body, #map {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    </style>
+</head>
+<body class="calcite">
+    <div id="map">
+    </div>
+    <div style="position:absolute;z-index:31;bottom:15px;right:15px;">
+        <button id="drawPoint" class="btn btn-default">绘图</button>
+    </div>
+    <script type="text/javascript">
+        var dojoConfig = {
+            "parseOnLoad": true,
+            "async": true
+        };
+    </script>
+    <script src="/arcgis_js_api/library/3.20/3.20compact/init.js"></script>
+    <script type="text/javascript">
+    require([
+        "esri/graphic",
+        "esri/map",
+        "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/toolbars/draw",
+        "dojo/dom",
+        "dojo/on",
+        "dojo/domReady!"
+    ], function(
+        Graphic,
+        Map,
+        ArcGISTiledMapServiceLayer,
+        SimpleMarkerSymbol,
+        Draw,
+        dom,
+        on
+    ) {
+
+        var map = new Map("map", {
+            "logo": false,
+            "zoom": 11,
+            "slider": true,
+            "sliderPosition": "top-left",
+            "center": [113.590307, 24.801479]
+        });
+
+        (function() {
+            var layer = new ArcGISTiledMapServiceLayer("//wx.yunqunet.net/arcgis/rest/services/shaoguan/sgdt/MapServer");
+            map.addLayer(layer);
+        })();
+
+        var symbol = new SimpleMarkerSymbol({"color": [0,92,230,255],"size": 15,"angle": 0,"xoffset": 0,"yoffset": 0,"type": "esriSMS","style": "esriSMSPath","outline": {"color": [0,92,230,255],"width": 1,"type": "esriSLS","style": "esriSLSSolid"},"path": "M16,3.5c-4.142,0-7.5,3.358-7.5,7.5c0,4.143,7.5,18.121,7.5,18.121S23.5,15.143,23.5,11C23.5,6.858,20.143,3.5,16,3.5z "});
+
+        var draw = new Draw(map);
+        draw.on("draw-complete", function(event) {
+            var graphic = new Graphic(event.geometry, symbol);
+            map.graphics.add(graphic);
+            map.setMapCursor("default");
+            draw.deactivate();
+        });
+
+        on(dom.byId("drawPoint"), "click", function() {
+            draw.activate(Draw.POINT);
+            map.setMapCursor("crosshair");
+        });
+    });
+    </script>
+</body>
+</html>
